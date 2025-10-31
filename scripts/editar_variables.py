@@ -1,0 +1,3 @@
+
+MODELO = "gpt-4.1"
+CHUNCKS_POR_DOCUMENTO = 4

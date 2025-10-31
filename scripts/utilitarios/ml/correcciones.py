@@ -1,5 +1,6 @@
 import numpy as np
-from scripts.utilitarios.embedding import generar_embedding 
+import os
+from scripts.utilitarios.embedding.embedding import generar_embedding 
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -7,7 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from configurar_base_conocimiento.bd.init_db import Correccion 
 # Ruta donde guardamos las correcciones
 
-DATABASE_URL = "postgresql://ingenieros_user:RPN3vIieAiYqSfWe85RoiY8z8IMNj4nK@dpg-d2nhqb95pdvs73bvh8f0-a.oregon-postgres.render.com/ingenieros"
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 

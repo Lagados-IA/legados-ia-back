@@ -8,12 +8,11 @@ from dotenv import load_dotenv
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from configurar_base_conocimiento.bd.init_db import Archivo,DocumentoEmbedding,Base,ArchivoResumen,DocumentoEmbeddingResumen
 import re
 # Cargar API Key de OpenAI
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
-DATABASE_URL = "postgresql://ingenieros_user:RPN3vIieAiYqSfWe85RoiY8z8IMNj4nK@dpg-d2nhqb95pdvs73bvh8f0-a.oregon-postgres.render.com/ingenieros"
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 

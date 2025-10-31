@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException,Form,File,Body,UploadFile
 from pydantic import BaseModel
 from datetime import datetime
-from scripts.consulta_rag import generar_respuesta_stream,generar_respuesta
+from scripts.generar_respuesta import generar_respuesta_stream
+from scripts.servicios.cruds.personas.crud import listar_personas,login,login2
+from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id
 from configurar_base_conocimiento.procesar_archivo import procesarArchivo
 import uvicorn
 import markdown2
@@ -21,7 +23,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # Inicializar FastAPI
 app = FastAPI(title="API RAG - Soporte Técnico")
 
-import requests 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # desde app.py
 CARPETA_INDEX = os.path.join(BASE_DIR, "index")
@@ -54,48 +55,19 @@ app.add_middleware(
 )
 
 class Mensaje(BaseModel):
-    rol: Literal["usuario", "bot"]
+    rol: Literal["user", "bot"]
     contenido: str
 # Modelo para recibir pregunta
 class PreguntaEntrada(BaseModel):
+    id: Optional[str]
     pregunta: str
     historial: List[Mensaje]
 # Modelo de respuesta
 class RespuestaSalida(BaseModel):
     respuesta: str
-    tokens: int
-    modelo: str
-    timestamp: str
 
 
 
-
-
-@app.post("/consultar", response_model=RespuestaSalida)
-def consultar(pregunta_entrada: PreguntaEntrada):
-    try:
-        
-        pregunta = pregunta_entrada.pregunta
-        historial = pregunta_entrada.historial
-        # pasamos los datos a la funcion generar respuesta
-        respuesta_texto, modelo_usado, tokens_utilizados = generar_respuesta(pregunta,historial)
-        print(respuesta_texto)
-
-        # Armar respuesta completa
-        return RespuestaSalida(
-            respuesta=respuesta_texto,  
-            tokens=tokens_utilizados,
-            modelo = modelo_usado,
-            timestamp=datetime.now().isoformat(),
-        )
-
-
-    except Exception as e:
-        import traceback
-        print("Error en /consultar:",e)
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-    
 
 
 
@@ -110,18 +82,19 @@ from fastapi.responses import StreamingResponse
 @app.post("/consultar-stream")
 def consultar_stream(pregunta_entrada: PreguntaEntrada):
     try:
+        id = pregunta_entrada.id 
         pregunta = pregunta_entrada.pregunta
         historial = pregunta_entrada.historial
 
-        generator = generar_respuesta_stream(pregunta, historial)
+        generator = generar_respuesta_stream(id,pregunta, historial)
         
         return StreamingResponse(generator(), media_type="text/event-stream")
         
     except Exception as e:
         import traceback
-        print("Error en /consultar-stream:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
@@ -142,7 +115,52 @@ async def subir_archivo(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
-   
+    
+
+
+    
+
+
+@app.get("/listar_personas")
+async def obtener_personas():
+    personas = listar_personas()
+    return personas
+
+@app.post("/login")
+async def log(
+    id: str = Form(...),
+    contrasena: str= Form(...)
+
+):
+    user = login(id,contrasena)
+    return user
+
+@app.post("/login2")
+async def log2(
+    id:str = Form(...),
+    contrasena2: str= Form(...),
+):
+    user = login2(id,contrasena2)
+    return user
+
+
+
+@app.get("/mostrar_preguntas")
+async def mostrar_preguntas(
+    id:str,
+):
+    return listar_preguntas_por_id(id)
+
+@app.post("/subir-info")
+async def subir_archivo(
+    id_respuesta:str = Form(...),
+    respuesta: str=Form(...)
+):
+    
+    editar(id_respuesta,respuesta)
+    return {"message": f"Respuesta {id_respuesta} actualizada correctamente ✅"}    
+
+
 
 # Ejecutar: uvicorn app:app --reload
 if __name__ == "__main__":

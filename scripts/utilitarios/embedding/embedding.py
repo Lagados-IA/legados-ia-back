@@ -14,16 +14,3 @@ def generar_embedding(texto: str) -> np.ndarray:
     return np.array(response.data[0].embedding, dtype="float32")
 
 
-
-# cache={}
-# def generar_embedding(texto: str) -> np.ndarray:
-#     if texto in cache:
-#         return cache[texto]
-#     response = client.embeddings.create(
-#         model="text-embedding-3-small",
-#         input=texto
-#     ).data[0].embedding
-#     array = np.array(response,dtype="float32")
-#     cache[texto] = array
-#     return array
-# 
