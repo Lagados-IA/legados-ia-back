@@ -22,10 +22,10 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
             embedding = [float(x) for x in embedding]
         
         query = text(f"""
-            SELECT  respuesta, embedding
+            SELECT  respuesta, pregunta 
             FROM chunks
             WHERE id_persona = :id_persona
-            ORDER BY embedding  <-> (:pregunta)::vector
+            ORDER BY embedding  <=> (:pregunta)::vector
             LIMIT :cantidad
         """)
 
@@ -36,7 +36,8 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
         #converir a diccionario
         chunks = [
             {
-                "respuesta": r.respuesta
+                "respuesta": r.respuesta,
+                "pregunta": r.pregunta
             }
             for r in resultados
         ]
@@ -47,3 +48,5 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
     except Exception as e:
         print(f"❌ Error en buscar_similares: {e}")
         return []
+    finally:
+        session.close()

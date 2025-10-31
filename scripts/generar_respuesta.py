@@ -23,8 +23,8 @@ def generar_respuesta_stream(user_id,pregunta_usuario, historial):
     
     chunks = elegir_mejor_chunck(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
 
-    contexto = "\n\n".join([f"{c['respuesta']} \n" for c in chunks])
-
+    contexto = "\n\n".join([f" Pregunta:{c['pregunta']} \n Respuesta:{c['respuesta']} \n" for c in chunks])
+    print(contexto)
     modelo = MODELO
     prompt = prompt_base()
     mensajes = [
@@ -33,6 +33,7 @@ def generar_respuesta_stream(user_id,pregunta_usuario, historial):
             "content": prompt  + f"\nMemoria: \n{contexto}"
         }
     ]
+
     mensajes.extend({
         "role": "user" if msg.rol == "user" else "assistant",
         "content": msg.contenido

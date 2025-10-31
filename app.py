@@ -98,26 +98,6 @@ def consultar_stream(pregunta_entrada: PreguntaEntrada):
 
 
 
-
-@app.post("/subir-archivo")
-async def subir_archivo(
-    clave_front: str= Form(...),
-    archivo: UploadFile = File(...)
-):
-    clave = "jorgecuadros"
-    if clave_front  != clave or clave == "":
-        raise HTTPException(status_code=401, detail="Clave incorrecta")
-    try:
-        contenido = await archivo.read()
-        nombre_archivo = archivo.filename
-        procesarArchivo(contenido, nombre_archivo)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-    
-
-
     
 
 
