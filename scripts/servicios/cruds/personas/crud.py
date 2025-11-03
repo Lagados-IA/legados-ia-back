@@ -55,11 +55,25 @@ def listar_personas():
 
 def obtener_persona(id: int):
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT id, nombre,apellidos, correo FROM persona"))
-        rows = result.fetchall()
-        print(rows)
-        return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo} for r in rows]
-
+        result = conn.execute(
+            text("""
+                SELECT id, nombre, apellidos, correo
+                FROM persona
+                WHERE id = :id
+                LIMIT 1
+            """),
+            {"id": id},
+        )
+        row = result.fetchone()
+        if row:
+            return {
+                "id": row.id,
+                "nombre": row.nombre,
+                "apellidos": row.apellidos,
+                "correo": row.correo,
+            }
+        else:
+            return {"id":0,"nombre":"no encontrado"}
 
 def eliminar(id: int):
     with engine.connect() as conn:
@@ -159,26 +173,7 @@ def acceso(correo,contrasena):
             
         else:
             return {"id": 0, "message":"No se encontro usuario"}
-
-def login(id,contrasena):
-
-    with engine.connect() as conn:
-        query = text("""
-            SELECT id,contrasena1 FROM persona
-            WHERE id = :id
-            LIMIT 1;
-        """)
-        result = conn.execute(query,{"id":id})
-        
-        user = result.fetchone()
-        if user:
-            if user.contrasena1 == contrasena:
-                return {"id": user.id, "message": "Contraseña correcta"}
-            else:
-                return {"id":0,"message":"Contraseña incorrecta"}
-        else:
-            return {"id": 0, "message":"No se encontro usuario"}
-    
+ 
 def login2(id,contrasena2):
 
     with engine.connect() as conn:

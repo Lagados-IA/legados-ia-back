@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException,Form,File,Body,UploadFile
 from pydantic import BaseModel
 from datetime import datetime
 from scripts.generar_respuesta import generar_respuesta_stream
-from scripts.servicios.cruds.personas.crud import listar_personas,login,login2, acceso,agregar
+from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar
 from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id
 from configurar_base_conocimiento.procesar_archivo import procesarArchivo
 import uvicorn
@@ -105,6 +105,12 @@ async def obtener_personas():
     personas = listar_personas()
     return personas
 
+@app.get("/obtener_persona")
+async def obtener_personas( id: int):
+    personas = obtener_persona(id)
+    
+    return personas
+
 
 @app.post("/crear_cuenta")
 async def crear_persona(
@@ -126,15 +132,6 @@ async def log(
 
 ):
     user = acceso(correo,contrasena)
-    return user
-
-@app.post("/login")
-async def log(
-    id: str = Form(...),
-    contrasena: str= Form(...)
-
-):
-    user = login(id,contrasena)
     return user
 
 @app.post("/login2")
