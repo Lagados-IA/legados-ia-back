@@ -3,10 +3,13 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 import numpy as np
+import jwt,datetime
 
 
 # URL de conexión (la misma que en init_db.py)
 DATABASE_URL = os.getenv("DATABASE_URL")
+SECRET_KEY = "clave101"
+ALGORITHM = "HS256"
 # Crear engine
 engine = create_engine(DATABASE_URL)
 
@@ -45,10 +48,17 @@ PREGUNTA_BASE = [
 
 def listar_personas():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT id, nombre FROM persona"))
+        result = conn.execute(text("SELECT id, nombre,apellidos, correo FROM persona"))
         rows = result.fetchall()
         print(rows)
-        return [{"id": r.id, "nombre": r.nombre} for r in rows]
+        return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo} for r in rows]
+
+def obtener_persona(id: int):
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT id, nombre,apellidos, correo FROM persona"))
+        rows = result.fetchall()
+        print(rows)
+        return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo} for r in rows]
 
 
 def eliminar(id: int):
@@ -123,6 +133,32 @@ def editar(id, nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrase
             print(f"Persona actualizada con id {id}")
         else:
             print(f"No se encontró ninguna persona con id {id}")
+
+def acceso(correo,contrasena):
+
+    with engine.connect() as conn:
+        query = text("""
+            SELECT id,contrasena1,correo FROM persona
+            WHERE correo = :correo
+            LIMIT 1;
+        """)
+        result = conn.execute(query,{"correo":correo})
+        
+        user = result.fetchone()
+        if user:
+                if user.contrasena1 == contrasena:
+                    exp = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                    token = jwt.encode(
+                        {"id": user.id, "correo": user.correo, "exp":exp},
+                        SECRET_KEY,
+                        algorithm=ALGORITHM
+                    )
+                    return {"id": user.id,"token":token, "message": "Ingresando"}
+                else:
+                    return {"id":0, "message":"Contraseña incorrecta"}
+            
+        else:
+            return {"id": 0, "message":"No se encontro usuario"}
 
 def login(id,contrasena):
 

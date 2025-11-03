@@ -21,6 +21,8 @@ class Persona(Base):
     correo = Column(Text)
     contrasena1 = Column(Text)
     contrasena2 = Column(Text)
+    #activacion = bool
+
 
     chunks = relationship("Chunks", back_populates="persona", cascade="all, delete-orphan")
 
