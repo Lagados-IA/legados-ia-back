@@ -58,7 +58,7 @@ class Mensaje(BaseModel):
     contenido: str
 # Modelo para recibir pregunta
 class PreguntaEntrada(BaseModel):
-    id: Optional[str]
+    id: int
     pregunta: str
     historial: List[Mensaje]
 # Modelo de respuesta
