@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 import openai
 import os
 from io import BytesIO 
-import base64
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")

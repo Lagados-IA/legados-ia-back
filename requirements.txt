@@ -20,3 +20,5 @@ pgvector
 requests
 beautifulsoup4
 
+jwt
+datetime
