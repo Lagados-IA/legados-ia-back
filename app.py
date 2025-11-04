@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException,Form,File,Body,UploadFile
 from pydantic import BaseModel
 from datetime import datetime
 from scripts.generar_respuesta import generar_respuesta_stream
-from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar
+from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar,editarPersona
 from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id
 from configurar_base_conocimiento.procesar_archivo import procesarArchivo
 import uvicorn
@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 import openai
 import os
 from io import BytesIO 
-
 from pathlib import Path
 import shutil
 from fastapi.responses import JSONResponse
@@ -147,6 +146,21 @@ async def crear_persona(
 ):
     personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
     return {"id":personaId}
+
+@app.post("/editar_cuenta")
+async def edit_persona(
+    id: int = Form(...),
+    nombre: str = Form(...),
+    apellidos: str = Form(...),
+    fecha_nacimiento: datetime = Form(...),
+    correo: str = Form(...),
+    contrasena1: str = Form(...),
+    contrasena2: str = Form(...),
+    foto: str = Form(...),
+):
+    editarPersona(id,nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
+    return {"status": "ok", "message": "Persona actualizada correctamente"}
+
 
 @app.post("/acceso")
 async def log(

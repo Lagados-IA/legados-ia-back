@@ -4,6 +4,7 @@ load_dotenv()
 import os
 import numpy as np
 import jwt,datetime
+from scripts.editar_variables import RUTA_BASICA
 
 
 # URL de conexión (la misma que en init_db.py)
@@ -56,7 +57,7 @@ def obtener_persona(id: int):
     with engine.connect() as conn:
         result = conn.execute(
             text("""
-                SELECT id, nombre, apellidos, correo,foto
+                SELECT id, nombre, apellidos,fecha_nacimiento, correo,contrasena1,contrasena2, foto
                 FROM persona
                 WHERE id = :id
                 LIMIT 1
@@ -69,8 +70,11 @@ def obtener_persona(id: int):
                 "id": row.id,
                 "nombre": row.nombre,
                 "apellidos": row.apellidos,
+                "fecha_nacimiento":row.fecha_nacimiento,
                 "correo": row.correo,
                 "foto": row.foto,
+                "contrasena1": row.contrasena1,
+                "contrasena2": row.contrasena2,
             }
         else:
             return {"id":0,"nombre":"no encontrado"}
@@ -119,35 +123,57 @@ def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2
 
 
 
+def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto):
+    try:
+        with engine.connect() as conn:
+            old_foto_query = text("SELECT foto FROM persona WHERE id = :id")
+            old_result = conn.execute(old_foto_query,{"id":id}).fetchone()
+            old_foto = old_result[0] if old_result else None
 
-def editar(id, nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2):
-    with engine.connect() as conn:
-        query = text("""
-            UPDATE  persona
-            SET nombre = :nombre,
-                apellidos = :apellidos,
-                fecha_nacimiento = :fecha_nacimiento,
-                correo = :correo,
-                contrasena1 = :contrasena1,
-                contrasena2 = :contrasena2    
+            if not foto or foto.strip()=="":
+                foto = old_foto
+            else:
+                if old_foto and old_foto != foto:
+                    old_path = old_foto.replace(RUTA_BASICA, ".")
+                    
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                        print(f"🗑️ Imagen anterior eliminada: {old_path}")
+                    else:
+                        print(f"⚠️ Imagen anterior no encontrada en: {old_path}")
+
+
+            query = text("""
+                UPDATE persona
+                SET nombre = :nombre,
+                    apellidos = :apellidos,
+                    fecha_nacimiento = :fecha_nacimiento,
+                    correo = :correo,
+                    contrasena1 = :contrasena1,
+                    contrasena2 = :contrasena2,
+                    foto = :foto
                 WHERE id = :id
-            RETURNING id;
-        """)
-        result = conn.execute(query,{
-            "id":id,
-            "nombre": nombre,
-            "apellidos": apellidos,
-            "fecha_nacimiento": fecha_nacimiento,
-            "correo": correo,
-            "contrasena1": contrasena1,
-            "contrasena2": contrasena2,
-        })
-        conn.commit()
-        updated = result.fetchone()
-        if updated:
-            print(f"Persona actualizada con id {id}")
-        else:
-            print(f"No se encontró ninguna persona con id {id}")
+                RETURNING id;
+            """)
+            result = conn.execute(query, {
+                "id": id,
+                "nombre": nombre,
+                "apellidos": apellidos,
+                "fecha_nacimiento": fecha_nacimiento,
+                "correo": correo,
+                "contrasena1": contrasena1,
+                "contrasena2": contrasena2,
+                "foto": foto,
+            })
+            conn.commit()
+
+            updated = result.fetchone()
+            if updated:
+                print(f"✅ Persona actualizada con id {id}")
+            else:
+                print(f"⚠️ No se encontró ninguna persona con id {id}")
+    except Exception as e:
+        print(f"❌ Error al actualizar persona: {e}")
 
 def acceso(correo,contrasena):
 
