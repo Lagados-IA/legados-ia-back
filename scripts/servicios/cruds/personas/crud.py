@@ -15,7 +15,6 @@ engine = create_engine(DATABASE_URL)
 
 PREGUNTA_BASE = [
             ("Detalles", "País/Ciudad"),
-            ("Detalles", "Fecha de nacimiento"),
             ("Detalles", "Profesíon u ocupación actual o pasada"),
             ("Personal", "¿Quién eres, de dónde vienes y qué experiencias marcaron tu vida?"),
             ("Personal", "¿Cuáles han sido los momentos más significativos de tu historia personal?"),
@@ -48,16 +47,16 @@ PREGUNTA_BASE = [
 
 def listar_personas():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT id, nombre,apellidos, correo FROM persona"))
+        result = conn.execute(text("SELECT id, nombre,apellidos, correo,foto FROM persona"))
         rows = result.fetchall()
         print(rows)
-        return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo} for r in rows]
+        return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo, "foto":r.foto} for r in rows]
 
 def obtener_persona(id: int):
     with engine.connect() as conn:
         result = conn.execute(
             text("""
-                SELECT id, nombre, apellidos, correo
+                SELECT id, nombre, apellidos, correo,foto
                 FROM persona
                 WHERE id = :id
                 LIMIT 1
@@ -71,6 +70,7 @@ def obtener_persona(id: int):
                 "nombre": row.nombre,
                 "apellidos": row.apellidos,
                 "correo": row.correo,
+                "foto": row.foto,
             }
         else:
             return {"id":0,"nombre":"no encontrado"}
@@ -86,11 +86,11 @@ def eliminar(id: int):
             print(f"⚠️ No se encontró ninguna Archivo con ID {id}.")
 
 
-def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2):
+def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto):
     with engine.connect() as conn:
         query = text("""
-            INSERT INTO persona (nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2)
-            VALUES (:nombre, :apellidos,:fecha_nacimiento, :correo, :contrasena1, :contrasena2)
+            INSERT INTO persona (nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto)
+            VALUES (:nombre, :apellidos,:fecha_nacimiento, :correo, :contrasena1, :contrasena2, :foto)
             RETURNING id;
         """)
         result = conn.execute(query,{
@@ -100,6 +100,7 @@ def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2
             "correo": correo,
             "contrasena1": contrasena1,
             "contrasena2": contrasena2,
+            "foto":foto,
         })
         persona_id = result.scalar()
         vector_vacio = np.zeros(1536, dtype=np.float32).tolist()
@@ -175,7 +176,6 @@ def acceso(correo,contrasena):
             return {"id": 0, "message":"No se encontro usuario"}
  
 def login2(id,contrasena2):
-
     with engine.connect() as conn:
         query = text("""
             SELECT id,contrasena2 FROM persona

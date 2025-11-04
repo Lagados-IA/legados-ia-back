@@ -21,6 +21,7 @@ class Persona(Base):
     correo = Column(Text)
     contrasena1 = Column(Text)
     contrasena2 = Column(Text)
+    foto = Column(Text)
     #activacion = bool
 
 

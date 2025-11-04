@@ -17,6 +17,10 @@ import openai
 import os
 from io import BytesIO 
 
+from pathlib import Path
+import shutil
+from fastapi.responses import JSONResponse
+
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 # Inicializar FastAPI
@@ -26,7 +30,8 @@ app = FastAPI(title="API RAG - Soporte Técnico")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # desde app.py
 CARPETA_INDEX = os.path.join(BASE_DIR, "index")
 
-
+UPLOAD_DIR = Path("imagen")
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 origins = [
     "http://localhost:3000",              
@@ -96,6 +101,24 @@ def consultar_stream(pregunta_entrada: PreguntaEntrada):
 
 
 
+@app.post("/imagen")
+async def subir_imagen(file: UploadFile = File(...)):
+    try:
+        # Guardar el archivo con su nombre
+        file_path = UPLOAD_DIR / file.filename
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Retornar la URL pública para que tu frontend la use
+        url_publica = f"/imagen/{file.filename}"
+        return JSONResponse({"url": url_publica})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error guardando imagen: {str(e)}")
+
+# Servir las imágenes estáticas desde la carpeta
+from fastapi.staticfiles import StaticFiles
+app.mount("/imagen", StaticFiles(directory=UPLOAD_DIR), name="imagen")
+
 
     
 
@@ -120,8 +143,9 @@ async def crear_persona(
     correo: str = Form(...),
     contrasena1: str = Form(...),
     contrasena2: str = Form(...),
+    foto: str = Form(...),
 ):
-    personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2)
+    personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
     return {"id":personaId}
 
 @app.post("/acceso")
