@@ -27,12 +27,23 @@ def generar_respuesta_stream(user_id,pregunta_usuario, historial):
     print(contexto)
     modelo = MODELO
     prompt = prompt_base()
-    mensajes = [
-        {
-            "role": "system",
-            "content": prompt  + f"\nMemoria: \n{contexto}"
-        }
-    ]
+
+    if chunks == []:
+        mensajes = [
+            {
+                "role": "system",
+                "content": "Responde exactamente: Lo siento, aún no he cargado información a mi legado"
+            }
+        ]
+    else:
+        
+
+        mensajes = [
+            {
+                "role": "system",
+                "content": prompt  + f"\nMemoria: \n{contexto}"
+            }
+        ]
 
     mensajes.extend({
         "role": "user" if msg.rol == "user" else "assistant",

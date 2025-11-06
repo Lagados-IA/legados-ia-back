@@ -20,19 +20,35 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
         
         if isinstance(embedding, np.ndarray):
             embedding = [float(x) for x in embedding]
+        vector_cero = [0.0]*1536
         
-        query = text(f"""
-            SELECT  respuesta, pregunta 
+
+        query = text("""
+            SELECT respuesta, pregunta
             FROM chunks
             WHERE id_persona = :id_persona
-            ORDER BY embedding  <=> (:pregunta)::vector
+            AND trim(coalesce(respuesta,''))<>''
+            ORDER BY embedding <=> (:pregunta)::vector
             LIMIT :cantidad
         """)
+        query = text("""
+            SELECT respuesta, pregunta
+            FROM chunks
+            WHERE id_persona = :id_persona
+              AND (embedding <=> (:vector_cero)::vector) IS DISTINCT FROM 0
+              AND trim(coalesce(respuesta, '')) <> ''     -- evita respuestas vacías
+            ORDER BY embedding <=> (:pregunta)::vector
+            LIMIT :cantidad
+        """)
+       
+
 
         resultados = session.execute(
             query,
-            {"id_persona":user_id, "pregunta":embedding,"cantidad":cantidad_chunks}
+            {"id_persona":user_id, "pregunta":embedding,"cantidad":cantidad_chunks,"vector_cero":vector_cero}
         ).fetchall()
+        if not resultados:
+            return []
         #converir a diccionario
         chunks = [
             {
