@@ -17,7 +17,7 @@ engine = create_engine(DATABASE_URL)
 PREGUNTA_BASE = [
             ("Detalles", "País/Ciudad"),
             ("Detalles", "Profesíon u ocupación actual o pasada"),
-            ("Personal", "¿Quién eres, de dónde vienes y qué experiencias marcaron tu vida?"),
+            ("Personal", "¿Quién eres, de dónde vienes y qué experiencias han marcado tu vida? Autobiografía "),
             ("Personal", "¿Cuáles han sido los momentos más significativos de tu historia personal?"),
             ("Personal", "¿Qué valores y principios te guiaron a lo largo de tu vida?"),
             ("Personal", "¿Qué lecciones importantes aprendiste del camino recorrido?"),
@@ -221,8 +221,6 @@ def login2(id,contrasena2):
     
 
 
-
-
 from datetime import date
 if __name__ == "__main__":
      
@@ -235,7 +233,7 @@ if __name__ == "__main__":
     # contrasena2="12345"
     # )
     
-    listar_personas()
+    
 
     # editar(
     # id = 1,
@@ -249,4 +247,4 @@ if __name__ == "__main__":
 
      
     #eliminar(1)
-    
+    listar_personas()

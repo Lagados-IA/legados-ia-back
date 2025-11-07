@@ -24,7 +24,8 @@ def listar_preguntas_por_id(id_persona):
             WHERE id_persona = :id_persona
         """)
         result = conn.execute(query, {"id_persona": id_persona})
-        rows = result.mappings().all()  
+        rows = result.mappings().all() 
+        print( [dict(r) for r in rows])
         return [dict(r) for r in rows]
 
     
@@ -53,9 +54,26 @@ def editar(id,respuesta):
             print(f"No se encontró ninguna registro con id {id}")  
 
 
+    
+def obtener_bio(idPersona: int, textoPregunta: str):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("""
+                SELECT id, faceta, pregunta, respuesta
+                FROM chunks
+                WHERE id_persona = :id_persona
+                AND pregunta ILIKE :pregunta
+            """),
+            {"id_persona": idPersona, "pregunta": f"%{textoPregunta}%"},
+        )
+        rows = result.mappings().all()
+        return [dict(r) for r in rows]
+        
+
+
 
 
 if __name__ == "__main__":
     
     #editar(1,"Charles huaman llaccta")
-    listar_preguntas_por_id(1)
+    listar_preguntas_por_id(5)

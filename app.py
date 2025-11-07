@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from scripts.generar_respuesta import generar_respuesta_stream
 from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar,editarPersona
-from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id
+from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id, obtener_bio
 from configurar_base_conocimiento.procesar_archivo import procesarArchivo
 import uvicorn
 import markdown2
@@ -196,6 +196,12 @@ async def subir_archivo(
     
     editar(id_respuesta,respuesta)
     return {"message": f"Respuesta {id_respuesta} actualizada correctamente ✅"}    
+
+@app.get("/obtener_biografia")
+async def obtener_personas( idPersona: int, textoPregunta:str ):
+    biografia = obtener_bio(idPersona, textoPregunta)
+    print(biografia)
+    return biografia 
 
 
 
