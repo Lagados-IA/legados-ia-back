@@ -63,6 +63,7 @@ class Mensaje(BaseModel):
 # Modelo para recibir pregunta
 class PreguntaEntrada(BaseModel):
     id: int
+    nombre: str
     pregunta: str
     historial: List[Mensaje]
 # Modelo de respuesta
@@ -86,10 +87,11 @@ from fastapi.responses import StreamingResponse
 def consultar_stream(pregunta_entrada: PreguntaEntrada):
     try:
         id = pregunta_entrada.id 
+        nombre = pregunta_entrada.nombre
         pregunta = pregunta_entrada.pregunta
         historial = pregunta_entrada.historial
 
-        generator = generar_respuesta_stream(id,pregunta, historial)
+        generator = generar_respuesta_stream(id,nombre, pregunta, historial)
         
         return StreamingResponse(generator(), media_type="text/event-stream")
         

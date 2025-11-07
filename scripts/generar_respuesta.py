@@ -19,14 +19,14 @@ client = OpenAI()
 
 
 
-def generar_respuesta_stream(user_id,pregunta_usuario, historial):
+def generar_respuesta_stream(user_id,nombre,pregunta_usuario, historial):
     
     chunks = elegir_mejor_chunck(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
 
     contexto = "\n\n".join([f" Pregunta:{c['pregunta']} \n Respuesta:{c['respuesta']} \n" for c in chunks])
     print(contexto)
     modelo = MODELO
-    prompt = prompt_base()
+    prompt = prompt_base(nombre)
 
     if chunks == []:
         mensajes = [
