@@ -128,7 +128,7 @@ def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2
 
 
 
-def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto,activacion):
+def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto,):
     try:
         with engine.connect() as conn:
             old_foto_query = text("SELECT foto FROM persona WHERE id = :id")
@@ -157,7 +157,7 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                     contrasena1 = :contrasena1,
                     contrasena2 = :contrasena2,
                     foto = :foto,
-                    activacion= :activacion
+                    
                 WHERE id = :id
                 RETURNING id;
             """)
@@ -170,7 +170,6 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                 "contrasena1": contrasena1,
                 "contrasena2": contrasena2,
                 "foto": foto,
-                "activacion": activacion
             })
             conn.commit()
 

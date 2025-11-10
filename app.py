@@ -160,9 +160,8 @@ async def edit_persona(
     contrasena1: str = Form(...),
     contrasena2: str = Form(...),
     foto: str = Form(...),
-    activacion: bool = Form(...),
 ):
-    editarPersona(id,nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto, activacion)
+    editarPersona(id,nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
     return {"status": "ok", "message": "Persona actualizada correctamente"}
 
 
