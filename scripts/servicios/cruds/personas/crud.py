@@ -130,7 +130,7 @@ def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2
 
 def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto,):
     try:
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             old_foto_query = text("SELECT foto FROM persona WHERE id = :id")
             old_result = conn.execute(old_foto_query,{"id":id}).fetchone()
             old_foto = old_result[0] if old_result else None
@@ -156,7 +156,7 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                     correo = :correo,
                     contrasena1 = :contrasena1,
                     contrasena2 = :contrasena2,
-                    foto = :foto,
+                    foto = :foto
                     
                 WHERE id = :id
                 RETURNING id;
@@ -171,7 +171,7 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                 "contrasena2": contrasena2,
                 "foto": foto,
             })
-            conn.commit()
+            
 
             updated = result.fetchone()
             if updated:
@@ -252,6 +252,6 @@ if __name__ == "__main__":
     # )
 
      
-    eliminar(6)
-    eliminar(5)
+    eliminar(1)
+    eliminar(3)
     listar_personas()
