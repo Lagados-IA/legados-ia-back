@@ -48,7 +48,7 @@ PREGUNTA_BASE = [
 
 def listar_personas():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT id, nombre,apellidos, correo,foto FROM persona"))
+        result = conn.execute(text("SELECT id, nombre,apellidos, correo,foto FROM persona WHERE activacion = True"))
         rows = result.fetchall()
         print(rows)
         return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo, "foto":r.foto} for r in rows]
@@ -57,7 +57,7 @@ def obtener_persona(id: int):
     with engine.connect() as conn:
         result = conn.execute(
             text("""
-                SELECT id, nombre, apellidos,fecha_nacimiento, correo,contrasena1,contrasena2, foto
+                SELECT id, nombre, apellidos,fecha_nacimiento, correo,contrasena1,contrasena2, foto,activacion
                 FROM persona
                 WHERE id = :id
                 LIMIT 1
@@ -75,6 +75,7 @@ def obtener_persona(id: int):
                 "foto": row.foto,
                 "contrasena1": row.contrasena1,
                 "contrasena2": row.contrasena2,
+                "activacion": row.activacion,
             }
         else:
             return {"id":0,"nombre":"no encontrado"}
@@ -90,11 +91,11 @@ def eliminar(id: int):
             print(f"⚠️ No se encontró ninguna Archivo con ID {id}.")
 
 
-def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto):
+def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto,activacion):
     with engine.connect() as conn:
         query = text("""
-            INSERT INTO persona (nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto)
-            VALUES (:nombre, :apellidos,:fecha_nacimiento, :correo, :contrasena1, :contrasena2, :foto)
+            INSERT INTO persona (nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2,foto,activacion)
+            VALUES (:nombre, :apellidos,:fecha_nacimiento, :correo, :contrasena1, :contrasena2, :foto,:activacion)
             RETURNING id;
         """)
         result = conn.execute(query,{
@@ -105,25 +106,29 @@ def agregar(nombre, apellidos,fecha_nacimiento, correo, contrasena1, contrasena2
             "contrasena1": contrasena1,
             "contrasena2": contrasena2,
             "foto":foto,
+            "activacion":activacion
         })
         persona_id = result.scalar()
-        vector_vacio = np.zeros(1536, dtype=np.float32).tolist()
-        
-        for faceta,pregunta in PREGUNTA_BASE:
-            conn.execute(text("""
-                INSERT INTO chunks (id_persona, faceta, pregunta, respuesta, embedding)
-                VALUES (:id_persona, :faceta, :pregunta, '', :embedding);
-            """),{"id_persona":persona_id, "faceta":faceta,"pregunta":pregunta, "embedding":vector_vacio})
+        if activacion is True:
+            vector_vacio = np.zeros(1536, dtype=np.float32).tolist()
+            
+            for faceta,pregunta in PREGUNTA_BASE:
+                conn.execute(text("""
+                    INSERT INTO chunks (id_persona, faceta, pregunta, respuesta, embedding)
+                    VALUES (:id_persona, :faceta, :pregunta, '', :embedding);
+                """),{"id_persona":persona_id, "faceta":faceta,"pregunta":pregunta, "embedding":vector_vacio})
+            
+            print(f"Persona agregada con id {persona_id} y {len(PREGUNTA_BASE)} preguntas base")
 
+        else:
+            print(f"Persona agregada con id {persona_id}")
         conn.commit()
-        
-        print(f"Persona agregada con id {persona_id} y {len(PREGUNTA_BASE)} preguntas base")
         return persona_id
 
 
 
 
-def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto):
+def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, contrasena2, foto,activacion):
     try:
         with engine.connect() as conn:
             old_foto_query = text("SELECT foto FROM persona WHERE id = :id")
@@ -151,7 +156,8 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                     correo = :correo,
                     contrasena1 = :contrasena1,
                     contrasena2 = :contrasena2,
-                    foto = :foto
+                    foto = :foto,
+                    activacion= :activacion
                 WHERE id = :id
                 RETURNING id;
             """)
@@ -164,6 +170,7 @@ def editarPersona(id, nombre, apellidos, fecha_nacimiento, correo, contrasena1, 
                 "contrasena1": contrasena1,
                 "contrasena2": contrasena2,
                 "foto": foto,
+                "activacion": activacion
             })
             conn.commit()
 
@@ -246,5 +253,6 @@ if __name__ == "__main__":
     # )
 
      
-    #eliminar(1)
+    eliminar(6)
+    eliminar(5)
     listar_personas()

@@ -145,8 +145,9 @@ async def crear_persona(
     contrasena1: str = Form(...),
     contrasena2: str = Form(...),
     foto: str = Form(...),
+    activacion: bool = Form(...),
 ):
-    personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
+    personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto,activacion)
     return {"id":personaId}
 
 @app.post("/editar_cuenta")
@@ -159,8 +160,9 @@ async def edit_persona(
     contrasena1: str = Form(...),
     contrasena2: str = Form(...),
     foto: str = Form(...),
+    activacion: str = Form(...),
 ):
-    editarPersona(id,nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto)
+    editarPersona(id,nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto, activacion)
     return {"status": "ok", "message": "Persona actualizada correctamente"}
 
 

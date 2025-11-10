@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey,Date
+from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey,Date,Boolean
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import text
 from pgvector.sqlalchemy import Vector 
@@ -22,7 +22,7 @@ class Persona(Base):
     contrasena1 = Column(Text)
     contrasena2 = Column(Text)
     foto = Column(Text)
-    #activacion = bool
+    activacion = Column(Boolean, default=False)
 
 
     chunks = relationship("Chunks", back_populates="persona", cascade="all, delete-orphan")
