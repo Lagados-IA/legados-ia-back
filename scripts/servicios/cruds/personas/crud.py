@@ -30,7 +30,6 @@ PREGUNTA_BASE = [
             ("Familiar", "¿Podrías compartir una historia o anécdota que refleje el espíritu de tu familia?"),
             ("Familiar", "¿Qué quisieras que tu familia recuerde de ti?"),
             ("Familiar", "¿Qué mensaje de amor o unión te gustaría dejar a las futuras generaciones de tu familia?"),
-            ("Profesional", "Campo o especialidad profesional:"),
             ("Profesional", "¿Cómo empezó tu carrera y qué desafíos o logros recuerdas con más cariño?"),
             ("Profesional", "¿Qué proyectos o experiencias marcaron tu desarrollo profesional?"),
             ("Profesional", "¿Qué aprendizajes te dejó tu trabajo y tu trayectoria laboral?"),
