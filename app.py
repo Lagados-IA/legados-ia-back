@@ -120,6 +120,29 @@ def consultar_audio(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+# import json
+# @app.post("/consultar-audio")
+# def consultar_audio(
+#         id: str = Form(...),
+#         nombre: str = Form(...),
+#         historial: str = Form(...),
+#         file: UploadFile = File(...)
+#     ):
+#     try:
+#         historial = json.loads(historial)
+
+#         # LEER EL AUDIO COMPLETO AQUÍ
+#         webm_bytes = file.file.read()
+#         file.file.close()  
+#         # PASAR LOS BYTES AL GENERADOR
+#         generador = lambda: generar_respuesta_audio(id, nombre, webm_bytes, historial)
+
+#         return StreamingResponse(generador(), media_type="text/event-stream")
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/imagen")

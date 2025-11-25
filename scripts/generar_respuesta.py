@@ -158,60 +158,82 @@ import tempfile
 
 
 
-def generar_respuesta_audio(user_id, nombre, file, historial):
-
-    # === 1) LEER WEBM DEL USUARIO ===
-    webm_bytes = file.file.read()
-
-    # === 2) TRANSCRIBIR AUDIO DEL USUARIO ===
-    transcription = client.audio.transcriptions.create(
-        model=MODELO_TRANSCRIBE,
-        file=("audio.webm", webm_bytes)
-    )
-    texto_usuario = transcription.text
-
-
-    # === 3) OBTENER CONTEXTO Y ARMAR MENSAJES ===
-    chunks = elegir_mejor_chunck(user_id, texto_usuario, CHUNCKS_POR_DOCUMENTO)
-    contexto = "\n\n".join([
-        f"Pregunta:{c['pregunta']}\nRespuesta:{c['respuesta']}" 
-        for c in chunks
-    ])
-
-    prompt = prompt_base(nombre)
-
-    mensajes = [{"role": "system", "content": prompt + f"\nMemoria:\n{contexto}"}]
-
-    for msg in historial:
-        mensajes.append({
-            "role": "user" if msg["rol"] == "user" else "assistant",
-            "content": msg["contenido"]
-        })
-
-    mensajes.append({"role": "user", "content": texto_usuario})
-
-
-    # === 4) GENERAR RESPUESTA EN TEXTO (GPT-4.1) ===
-    completion = client.chat.completions.create(
-        model=MODELO_MINI,
-        messages=mensajes
-    )
-    texto_ia = completion.choices[0].message.content
-
-
-    tts = client.audio.speech.create(
-        model=MODELO_TEXTO_AUDIO,
-        voice="onyx",
-        input=texto_ia
-    )
-    audio_ia = tts.read()
-
-    audio_b64 = base64.b64encode(audio_ia).decode("utf-8")
-
-
-    # === 6) RETORNAR TODA LA DATA ===
+def generar_respuesta_audio(user_id, nombre, file, historial): 
+    # === 1) LEER WEBM DEL USUARIO === 
+    webm_bytes = file.file.read() 
+    # === 2) TRANSCRIBIR AUDIO DEL USUARIO === 
+    transcription = client.audio.transcriptions.create( 
+        model=MODELO_TRANSCRIBE, file=("audio.webm", webm_bytes) ) 
+    texto_usuario = transcription.text 
+    # === 3) OBTENER CONTEXTO Y ARMAR MENSAJES === 
+    chunks = elegir_mejor_chunck(user_id, texto_usuario, CHUNCKS_POR_DOCUMENTO) 
+    contexto = "\n\n".join([ f"Pregunta:{c['pregunta']}\nRespuesta:{c['respuesta']}" for c in chunks ]) 
+    prompt = prompt_base(nombre) 
+    mensajes = [{"role": "system", "content": prompt + f"\nMemoria:\n{contexto}"}] 
+    for msg in historial: mensajes.append(
+        { "role": "user" if msg["rol"] == "user" else "assistant", "content": msg["contenido"] }) 
+    mensajes.append({"role": "user", "content": texto_usuario}) 
+    # === 4) GENERAR RESPUESTA EN TEXTO (GPT-4.1) === 
+    completion = client.chat.completions.create( model=MODELO_MINI, messages=mensajes ) 
+    texto_ia = completion.choices[0].message.content 
+    tts = client.audio.speech.create( model=MODELO_TEXTO_AUDIO, voice="onyx", input=texto_ia ) 
+    audio_ia = tts.read() 
+    audio_b64 = base64.b64encode(audio_ia).decode("utf-8") 
+    # === 6) RETORNAR TODA LA DATA === 
     return audio_b64, texto_ia, texto_usuario
 
+# def generar_respuesta_audio(user_id, nombre, file, historial):
+
+#     transcription = client.audio.transcriptions.create(
+#         model=MODELO_TRANSCRIBE,
+#         file=("audio.webm", file)
+#     )
+#     texto_usuario = transcription.text
+#     yield f"event:transcripcion\ndata:{texto_usuario}\n\n"
+
+#     # === 3) CONTEXTO Y MENSAJES ===
+#     chunks = elegir_mejor_chunck(user_id, texto_usuario, CHUNCKS_POR_DOCUMENTO)
+#     contexto = "\n\n".join([
+#         f"Pregunta:{c['pregunta']}\nRespuesta:{c['respuesta']}" 
+#         for c in chunks
+#     ])
+
+#     prompt = prompt_base(nombre)
+
+#     mensajes = [{"role": "system", "content": prompt + f"\nMemoria:\n{contexto}"}]
+
+#     for msg in historial:
+#         mensajes.append({
+#             "role": "user" if msg["rol"] == "user" else "assistant",
+#             "content": msg["contenido"]
+#         })
+
+#     mensajes.append({"role": "user", "content": texto_usuario})
+#     texto_ia=""
+    
+#     completion_stream = client.chat.completions.create(
+#         model=MODELO_MINI,
+#         messages=mensajes,
+#         stream=True
+#     )
+    
+#     for chunk in completion_stream:
+#         delta = chunk.choices[0].delta.content
+#         if delta:
+#             texto_ia += delta
+#             yield f"event:texto\ndata:{delta}\n\n"
+
+#     # === 5) TTS FINAL ===
+#     tts = client.audio.speech.create(
+#         model=MODELO_TEXTO_AUDIO,
+#         voice="onyx",
+#         input=texto_ia
+#     )
+#     audio_ia = tts.read()
+#     audio_b64 = base64.b64encode(audio_ia).decode("utf-8")
+
+#     yield f"event:audio\ndata:{audio_b64}\n\n"
+#     yield f"event:end\ndata:done\n\n"
 
 
 
