@@ -29,7 +29,7 @@ app = FastAPI(title="API RAG - Soporte Técnico")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # desde app.py
 CARPETA_INDEX = os.path.join(BASE_DIR, "index")
 
-UPLOAD_DIR = Path("imagen")
+UPLOAD_DIR = Path("/opt/render/project/src/imagen")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 origins = [
@@ -131,14 +131,14 @@ async def subir_imagen(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, buffer)
         
         # Retornar la URL pública para que tu frontend la use
-        url_publica = f"/imagen/{file.filename}"
+        url_publica = f"/opt/render/project/src/imagen/{file.filename}"
         return JSONResponse({"url": url_publica})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error guardando imagen: {str(e)}")
 
 # Servir las imágenes estáticas desde la carpeta
 from fastapi.staticfiles import StaticFiles
-app.mount("/imagen", StaticFiles(directory=UPLOAD_DIR), name="imagen")
+app.mount("/opt/render/project/src/imagen", StaticFiles(directory=UPLOAD_DIR), name="imagen")
 
 
     
