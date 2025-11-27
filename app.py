@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException,Form,File,Body,UploadFile
 from pydantic import BaseModel
 from datetime import datetime
-from scripts.generar_respuesta import generar_respuesta_stream, generar_respuesta_audio
+from scripts.generar_respuesta import generar_respuesta_stream, generar_respuesta_audio,generar_respuesta_audio_puro, generar_respuesta_audio_texto
 from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar,editarPersona
 from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id, obtener_bio
 from configurar_base_conocimiento.procesar_archivo import procesarArchivo
@@ -101,26 +101,6 @@ def consultar_stream(pregunta_entrada: PreguntaEntrada):
         raise HTTPException(status_code=500, detail=str(e))
     
 import json
-@app.post("/consultar-audio")
-def consultar_audio(
-        id: str = Form(...),
-        nombre: str = Form(...),
-        historial: str = Form(...),
-        file: UploadFile = File(...)
-    ):
-    try:
-        historial = json.loads(historial)
-        audio_ia, texto_ia, texto_usuario = generar_respuesta_audio(id,nombre, file, historial)
-        
-
-        return {"audio_base64":audio_ia,"texto_ia": texto_ia, "texto_usuario": texto_usuario}
-        
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-
-# import json
 # @app.post("/consultar-audio")
 # def consultar_audio(
 #         id: str = Form(...),
@@ -130,19 +110,54 @@ def consultar_audio(
 #     ):
 #     try:
 #         historial = json.loads(historial)
+#         audio_ia, texto_ia, texto_usuario = generar_respuesta_audio(id,nombre, file, historial)
+        
 
-#         # LEER EL AUDIO COMPLETO AQUÍ
-#         webm_bytes = file.file.read()
-#         file.file.close()  
-#         # PASAR LOS BYTES AL GENERADOR
-#         generador = lambda: generar_respuesta_audio(id, nombre, webm_bytes, historial)
-
-#         return StreamingResponse(generador(), media_type="text/event-stream")
-
+#         return {"audio_base64":audio_ia,"texto_ia": texto_ia, "texto_usuario": texto_usuario}
+        
 #     except Exception as e:
 #         import traceback
 #         traceback.print_exc()
 #         raise HTTPException(status_code=500, detail=str(e))
+
+# NUEVO AUDIO
+@app.post("/consultar-audio-texto")
+def consultar_audio(
+        id: str = Form(...),
+        nombre: str = Form(...),
+        historial: str = Form(...),
+        file: UploadFile = File(...)
+    ):
+    try:
+        
+        historial = json.loads(historial)
+        texto_ia, texto_usuario = generar_respuesta_audio_texto(id,nombre, file, historial)
+        
+
+        return {"texto_ia": texto_ia, "texto_usuario": texto_usuario}
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.post("/consultar-audio-puro")
+def consultar_audio(
+        texto_ia: str = Form(...),
+    ):
+    try:
+        
+        audio_ia = generar_respuesta_audio_puro(texto_ia)
+        
+
+        return {"audio_ia":audio_ia}
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @app.post("/imagen")
