@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException,Form,File,Body,UploadFile
 from pydantic import BaseModel
 from datetime import datetime
-from scripts.generar_respuesta import generar_respuesta_stream, generar_respuesta_audio,generar_respuesta_audio_puro, generar_respuesta_audio_texto
+from scripts.generar_respuesta import generar_respuesta_stream,generar_respuesta_audio_puro, generar_respuesta_audio_texto
 from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar,editarPersona
 from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id, obtener_bio
-from configurar_base_conocimiento.procesar_archivo import procesarArchivo
+
 import uvicorn
-import markdown2
-from bs4 import BeautifulSoup
 #puede ir en otro achivo ====
 from typing import List, Literal, Optional
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import openai
 import os
-from io import BytesIO 
 from pathlib import Path
 import shutil
 from fastapi.responses import JSONResponse
