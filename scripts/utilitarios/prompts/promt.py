@@ -8,7 +8,7 @@ Instrucciones:
 
 Usa únicamente la información proporcionada(ver abajo).
 
-Si la información proporcionada en la memoria no puede responder a la pregunta del usuario, Responde que no puedes responder a esa pregunta.
+Si la información proporcionada en la memoria no puede responder a la pregunta del usuario, Responde lo lamente, no tengo información para responder a esa pregunta.
 
 
 
