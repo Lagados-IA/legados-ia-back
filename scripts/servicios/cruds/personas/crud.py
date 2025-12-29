@@ -251,5 +251,6 @@ if __name__ == "__main__":
     # )
 
      
-    #eliminar(5)
+    #eliminar(7)
+    #eliminar(8)
     listar_personas()

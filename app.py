@@ -3,7 +3,8 @@ from pydantic import BaseModel
 from datetime import datetime
 from scripts.generar_respuesta import generar_respuesta_stream,generar_respuesta_audio_puro, generar_respuesta_audio_texto
 from scripts.servicios.cruds.personas.crud import listar_personas,obtener_persona,login2, acceso,agregar,editarPersona
-from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id, obtener_bio
+from scripts.servicios.cruds.chunks.crud import editar, listar_preguntas_por_id, obtener_bio,subirLibro,listar_libro,eliminar_libro
+from scripts.servicios.cruds.libro.crudLibro import extraer_texto
 
 import uvicorn
 #puede ir en otro achivo ====
@@ -199,7 +200,7 @@ async def crear_persona(
     correo: str = Form(...),
     contrasena1: str = Form(...),
     contrasena2: str = Form(...),
-    foto: str = Form(...),
+    foto: str = Form(None),
     activacion: bool = Form(...),
 ):
     personaId = agregar(nombre,apellidos,fecha_nacimiento,correo,contrasena1,contrasena2,foto,activacion)
@@ -254,6 +255,37 @@ async def subir_archivo(
     
     editar(id_respuesta,respuesta)
     return {"message": f"Respuesta {id_respuesta} actualizada correctamente ✅"}    
+
+
+# ========
+# LIBROS
+# ========
+@app.post("/subir-libro")
+async def subir_documento(
+    id_persona: str = Form(...),
+    nombreLibro:str = Form(...),
+    contenido: UploadFile=File(...)
+):
+    texto_puro = await extraer_texto(contenido)
+    subirLibro(id_persona,nombreLibro,texto_puro)
+    return {"message": f"Libro {nombreLibro} insertado correctamente ✅"}   
+
+@app.get("/listar_libros")
+async def obtener_libros():
+    libros = listar_libro()
+    return libros
+
+@app.delete("/eliminar-libro/{uuid}")
+async def eliminar_libro_endpoint(uuid: str):
+    try:
+        resultado = eliminar_libro(uuid)
+        return resultado
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error al eliminar el libro")
+
+
 
 @app.get("/obtener_biografia")
 async def obtener_personas( idPersona: int, textoPregunta:str ):

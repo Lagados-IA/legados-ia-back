@@ -2,7 +2,7 @@ import json
 import openai
 from dotenv import load_dotenv
 import os
-from scripts.utilitarios.gestion_conocimiento.agente_selector import elegir_mejor_chunck
+from scripts.utilitarios.gestion_conocimiento.agente_selector import elegir_mejor_chunck,elergir_chunk_libro
 from scripts.utilitarios.prompts.promt import prompt_base
 from scripts.editar_variables import MODELO,CHUNCKS_POR_DOCUMENTO,MODELO_MINI,MODELO_TRANSCRIBE,MODELO_TEXTO_AUDIO
 
@@ -21,10 +21,15 @@ client = OpenAI()
 
 def generar_respuesta_stream(user_id,nombre,pregunta_usuario, historial):
     
+    #OBTENER RESPUESTAR
     chunks = elegir_mejor_chunck(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
+    chunks_libro = elergir_chunk_libro(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
 
-    contexto = "\n\n".join([f" Pregunta:{c['pregunta']} \n Respuesta:{c['respuesta']} \n" for c in chunks])
+
+    contexto = "\n\n".join([f" Memoria:{c['pregunta']} \n{c['respuesta']} \n" for c in chunks])
+    contextoLibro = "\n\n".join([f" Memoria:{c['contenido']}" for c in chunks_libro])
     print(contexto)
+    print(contextoLibro)
     modelo = MODELO
     prompt = prompt_base(nombre)
 
@@ -41,7 +46,7 @@ def generar_respuesta_stream(user_id,nombre,pregunta_usuario, historial):
         mensajes = [
             {
                 "role": "system",
-                "content": prompt  + f"\nMemoria: \n{contexto}"
+                "content": prompt  + f"\nMemoria: \n{contexto}\n{contextoLibro}"
             }
         ]
 
@@ -117,15 +122,23 @@ def generar_respuesta_audio_texto(user_id, nombre, file, historial):
 
     # === 3) CONTEXTO Y MENSAJES ===
     chunks = elegir_mejor_chunck(user_id, texto_usuario, CHUNCKS_POR_DOCUMENTO)
+    chunks_libro = elergir_chunk_libro(user_id,texto_usuario,CHUNCKS_POR_DOCUMENTO)
+    
     contexto = "\n\n".join([
-        f"Pregunta:{c['pregunta']}\nRespuesta:{c['respuesta']}" 
+        f"Memoria:{c['pregunta']}\n{c['respuesta']}" 
         for c in chunks
     ])
+    contextoLibro = "\n\n".join([f" Memoria:{c['contenido']}" for c in chunks_libro])
+    
 
     prompt = prompt_base(nombre)
 
-    mensajes = [{"role": "system", "content": prompt + f"\nMemoria:\n{contexto}"}]
-
+    mensajes = [
+            {
+                "role": "system",
+                "content": prompt  + f"\nMemoria: \n{contexto}  \n{contextoLibro}"
+            }
+        ]
     for msg in historial:
         mensajes.append({
             "role": "user" if msg["rol"] == "user" else "assistant",

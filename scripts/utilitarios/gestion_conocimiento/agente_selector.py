@@ -23,14 +23,7 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
         vector_cero = [0.0]*1536
         
 
-        query = text("""
-            SELECT respuesta, pregunta
-            FROM chunks
-            WHERE id_persona = :id_persona
-            AND trim(coalesce(respuesta,''))<>''
-            ORDER BY embedding <=> (:pregunta)::vector
-            LIMIT :cantidad
-        """)
+        
         query = text("""
             SELECT respuesta, pregunta
             FROM chunks
@@ -54,6 +47,57 @@ def elegir_mejor_chunck(user_id, pregunta, cantidad_chunks):
             {
                 "respuesta": r.respuesta,
                 "pregunta": r.pregunta
+            }
+            for r in resultados
+        ]
+
+        return chunks
+
+
+    except Exception as e:
+        print(f"❌ Error en buscar_similares: {e}")
+        return []
+    finally:
+        session.close()
+
+
+
+def elergir_chunk_libro(user_id, pregunta, cantidad_chunks):
+
+    session = SessionLocal()
+    
+    try:
+        embedding = generar_embedding(pregunta)
+        
+        if isinstance(embedding, np.ndarray):
+            embedding = [float(x) for x in embedding]
+        vector_cero = [0.0]*1536
+        
+
+        
+        query = text("""
+            SELECT libro,contenido
+            FROM document_chunks
+            WHERE id_persona = :id_persona
+              AND (embedding <=> (:vector_cero)::vector) IS DISTINCT FROM 0
+              AND trim(coalesce(contenido, '')) <> ''    
+            ORDER BY embedding <=> (:pregunta)::vector
+            LIMIT :cantidad
+        """)
+       
+
+
+        resultados = session.execute(
+            query,
+            {"id_persona":user_id, "pregunta":embedding,"cantidad":cantidad_chunks,"vector_cero":vector_cero}
+        ).fetchall()
+        if not resultados:
+            return []
+        #converir a diccionario
+        chunks = [
+            {
+                "contenido": r.contenido,
+                "libro": r.libro
             }
             for r in resultados
         ]
