@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 from scripts.utilitarios.gestion_conocimiento.agente_selector import elegir_mejor_chunck,elergir_chunk_libro
 from scripts.utilitarios.prompts.promt import prompt_base
-from scripts.editar_variables import MODELO,CHUNCKS_POR_DOCUMENTO,MODELO_MINI,MODELO_TRANSCRIBE,MODELO_TEXTO_AUDIO
+from scripts.editar_variables import MODELO,CHUNCKS_POR_DOCUMENTO,CHUNCKS_POR_LIBRO,MODELO_MINI,MODELO_TRANSCRIBE,MODELO_TEXTO_AUDIO
 
 import re
 # Cargar clave desde .env
@@ -23,7 +23,7 @@ def generar_respuesta_stream(user_id,nombre,pregunta_usuario, historial):
     
     #OBTENER RESPUESTAR
     chunks = elegir_mejor_chunck(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
-    chunks_libro = elergir_chunk_libro(user_id,pregunta_usuario,CHUNCKS_POR_DOCUMENTO)
+    chunks_libro = elergir_chunk_libro(user_id,pregunta_usuario,CHUNCKS_POR_LIBRO)
 
 
     contexto = "\n\n".join([f" Memoria:{c['pregunta']} \n{c['respuesta']} \n" for c in chunks])
@@ -122,7 +122,7 @@ def generar_respuesta_audio_texto(user_id, nombre, file, historial):
 
     # === 3) CONTEXTO Y MENSAJES ===
     chunks = elegir_mejor_chunck(user_id, texto_usuario, CHUNCKS_POR_DOCUMENTO)
-    chunks_libro = elergir_chunk_libro(user_id,texto_usuario,CHUNCKS_POR_DOCUMENTO)
+    chunks_libro = elergir_chunk_libro(user_id,texto_usuario,CHUNCKS_POR_LIBRO)
     
     contexto = "\n\n".join([
         f"Memoria:{c['pregunta']}\n{c['respuesta']}" 

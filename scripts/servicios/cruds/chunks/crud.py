@@ -101,6 +101,18 @@ def subirLibro(id_persona,nombreLibro, contenido):
 
 
 
+def listar_chunks_libro():
+    with engine.begin() as conn:
+        result = conn.execute(
+            text("""
+                SELECT id, id_persona, libro
+                FROM document_chunks
+            """)
+        ).mappings().all()
+    print(result)
+    
+
+
 def listar_libro():
     with engine.begin() as conn:
         result = conn.execute(
@@ -177,7 +189,7 @@ def obtener_bio(idPersona: int, textoPregunta: str):
 
 if __name__ == "__main__":
     #eliminar_libro("0791c8fb-9bb3-40cc-852e-90679ee03dd9")
-    listar_libro()
+    listar_chunks_libro()
     
     #editar(1,"Charles huaman llaccta")
     #listar_preguntas_por_id(5)
