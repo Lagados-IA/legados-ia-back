@@ -51,6 +51,12 @@ def listar_personas():
         rows = result.fetchall()
         print(rows)
         return [{"id": r.id, "nombre": r.nombre,"apellidos":r.apellidos, "correo": r.correo, "foto":r.foto} for r in rows]
+    
+def listar_personas2():
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT  nombre,apellidos, correo, contrasena1 FROM persona WHERE activacion = True"))
+        rows = result.fetchall()
+        print(rows)
 
 def obtener_persona(id: int):
     with engine.connect() as conn:
@@ -253,4 +259,4 @@ if __name__ == "__main__":
      
     #eliminar(7)
     #eliminar(8)
-    listar_personas()
+    listar_personas2()

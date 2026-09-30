@@ -1,9 +1,8 @@
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey,Date,Boolean,String
+from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey,Date,Boolean,String,text
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import text
 from pgvector.sqlalchemy import Vector 
 
 load_dotenv()
