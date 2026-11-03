@@ -16,6 +16,7 @@ python-multipart
 
 SQLAlchemy
 psycopg2-binary
+psycopg[binary]
 pgvector
 requests
 beautifulsoup4
